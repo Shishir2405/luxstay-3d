@@ -4,6 +4,7 @@ import { bookingRepository, type BookingListFilter } from './booking.repository'
 import { availabilityService } from '@/server/modules/rooms/availability.service';
 import { pricingService } from '@/server/modules/rooms/pricing.service';
 import { promoService } from '@/server/modules/rooms/promo.service';
+import { emailService } from '@/server/modules/email/email.service';
 import { RoomTypeModel } from '@/server/models/room-type.model';
 import { getSettings } from '@/server/modules/settings/settings.service';
 import { ApiError } from '@/server/utils/api-error';
@@ -209,6 +210,9 @@ export const bookingService = {
         /* promo redemption is best-effort; never blocks confirmation */
       }
     }
+
+    // Send the booking confirmation email (best-effort; never blocks confirmation).
+    void emailService.sendBookingConfirmation(booking.toJSON());
 
     return booking;
   },
