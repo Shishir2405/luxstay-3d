@@ -3,20 +3,15 @@ import 'server-only';
 /**
  * Centralized, typed access to environment configuration.
  *
- * Required secrets fall back to clearly-marked dev defaults so the app still
- * boots locally without a full `.env.local`, while logging a warning. In
- * production (`NODE_ENV=production`) missing required secrets throw at startup.
+ * Returns the env value, or the provided fallback (default '') when unset. We do
+ * NOT throw here: `env` is evaluated at module-eval time (incl. during
+ * `next build` page-data collection), so throwing would break builds. Features
+ * that truly need a secret (Razorpay, email) validate it at the point of use and
+ * surface a friendly runtime error instead.
  */
-function read(key: string, fallback?: string): string {
+function read(key: string, fallback = ''): string {
   const value = process.env[key];
-  if (value && value.length > 0) return value;
-  if (fallback !== undefined) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error(`[env] Missing required environment variable: ${key}`);
-    }
-    return fallback;
-  }
-  return '';
+  return value && value.length > 0 ? value : fallback;
 }
 
 export const env = {
